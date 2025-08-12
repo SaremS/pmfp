@@ -6,7 +6,7 @@
 
 Forward proxy with minimal features (currently only adds custom headers to each request)
 ## Usage
-Currenty
+Currently
 ```
 go run cmd/main.go --config {config-yaml; see examples} --port {target port to bind proxy to}
 ```
