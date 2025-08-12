@@ -16,7 +16,7 @@ go run cmd/main.go --config {config-yaml; see examples} --port {target port to b
 (Auth-Middleware bypass in Next.JS)
 
 #### Config (see examples):
-``
+```
 scope:
 - type: exact_match
   target_host: 94.237.57.115:54987
