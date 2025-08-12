@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/http"
 
 	"encoding/json"
 
@@ -15,6 +16,25 @@ type ManipulatorArray []rm.RequestManipulator
 type Config struct {
 	Scope       ScopeArray       
 	Manipulators ManipulatorArray 
+}
+
+func (c *Config) isInScope(target string) bool {
+	for _, scoper := range c.Scope {
+		if scoper.IsInScope(target) {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Config) ApplyManipulation(request *http.Request) {
+	target := request.URL.Host 
+
+	if c.isInScope(target) {
+		for _, manipulator := range c.Manipulators {
+			manipulator.Apply(request)
+		}
+	}
 }
 
 func (c *Config) UnmarshalJSON(data []byte) error {

@@ -1,0 +1,7 @@
+scope:
+- type: exact_match
+  target_host: 94.237.57.115:54987
+request_manipulators:
+- type: add_header
+  header_name: x-middleware-subrequest
+  header_value: "middleware:middleware:middleware:middleware:middleware"
