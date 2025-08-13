@@ -15,7 +15,7 @@ import (
 )
 
 type ProxyHandler struct {
-	config.Config
+	config.ConfigElement
 }
 
 func (p *ProxyHandler) HandleHttp(w http.ResponseWriter, r *http.Request) {
@@ -35,13 +35,13 @@ func (p *ProxyHandler) HandleHttp(w http.ResponseWriter, r *http.Request) {
 
 	var client *http.Client
 
-	if p.Config.ProxyServer == nil {
+	if p.ConfigElement.ProxyServer == nil {
 		client = &http.Client{
 			Timeout: 3 * time.Second,
 		}
 	} else {
 		transport := &http.Transport{
-			Proxy: http.ProxyURL(p.Config.ProxyServer),
+			Proxy: http.ProxyURL(p.ConfigElement.ProxyServer),
 		}
 		client = &http.Client{
 			Timeout:   3 * time.Second,
@@ -49,7 +49,7 @@ func (p *ProxyHandler) HandleHttp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	p.Config.ApplyManipulation(proxyReq)
+	p.ConfigElement.ApplyRequestMiddleware(proxyReq)
 
 	resp, err := client.Do(proxyReq)
 	if err != nil {
@@ -79,13 +79,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	var config config.Config
+	var config config.ConfigElement
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		fmt.Printf("Error unmarshaling YAML: %v\n", err)
 		os.Exit(1)
 	}
 
-	proxyHandler := ProxyHandler{Config: config}
+	proxyHandler := ProxyHandler{ConfigElement: config}
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%d", *targetPort),

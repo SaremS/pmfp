@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestConfigUnmarshalScope(t *testing.T) {
+func TestConfigElementUnmarshalScope(t *testing.T) {
 	yamlInput := `
 scope:
 - type: exact_match
@@ -19,7 +19,7 @@ request_middlewares:
   header_name: X-Test
   header_value: Test
 `
-	var cfg Config
+	var cfg ConfigElement
 	err := yaml.Unmarshal([]byte(yamlInput), &cfg)
 	if err != nil {
 		t.Fatalf("Unmarshal failed with error: %v", err)
@@ -76,7 +76,7 @@ request_middlewares:
 	}
 }
 
-func TestConfigUnmarshalScopeWithProxy(t *testing.T) {
+func TestConfigElementUnmarshalScopeWithProxy(t *testing.T) {
 	yamlInput := `
 scope:
 - type: exact_match
@@ -89,7 +89,7 @@ request_middlewares:
   header_value: Test
 proxy_server: http://localhost:8000
 `
-	var cfg Config
+	var cfg ConfigElement
 	err := yaml.Unmarshal([]byte(yamlInput), &cfg)
 	if err != nil {
 		t.Fatalf("Unmarshal failed with error: %v", err)

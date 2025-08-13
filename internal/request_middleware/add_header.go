@@ -14,5 +14,5 @@ func (a *AddHeader) Apply(request *http.Request) {
 }
 
 func init() {
-	RegisterRequestMiddleware("add_header", func() RequestMiddleware{ return &AddHeader{} })
+	RegisterRequestMiddleware("add_header", func() RequestMiddleware { return &AddHeader{} })
 }

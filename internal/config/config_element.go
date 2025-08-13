@@ -14,13 +14,14 @@ import (
 type ScopeArray []scope.Scope
 type RequestMiddlewareArray []rm.RequestMiddleware
 
-type Config struct {
-	Scope        ScopeArray
-	RequestMiddlewares RequestMiddlewareArray 
-	ProxyServer  *url.URL
+type ConfigElement struct {
+	Name               string
+	Scope              ScopeArray
+	RequestMiddlewares RequestMiddlewareArray
+	ProxyServer        *url.URL
 }
 
-func (c *Config) isInScope(target string) bool {
+func (c *ConfigElement) isInScope(target string) bool {
 	for _, scoper := range c.Scope {
 		if scoper.IsInScope(target) {
 			return true
@@ -29,24 +30,25 @@ func (c *Config) isInScope(target string) bool {
 	return false
 }
 
-func (c *Config) ApplyManipulation(request *http.Request) {
+func (c *ConfigElement) ApplyRequestMiddleware(request *http.Request) {
 	target := request.URL.Host
 
 	if c.isInScope(target) {
-		for _, manipulator := range c.RequestMiddlewares {
-			manipulator.Apply(request)
+		for _, requestMiddleware := range c.RequestMiddlewares {
+			requestMiddleware.Apply(request)
 		}
 	}
 }
 
-func (c *Config) UnmarshalJSON(data []byte) error {
-	type ConfigAlias struct {
-		Scope        []json.RawMessage `json:"scope"`
+func (c *ConfigElement) UnmarshalJSON(data []byte) error {
+	type ConfigElementAlias struct {
+		Name               string            `json:"name"`
+		Scope              []json.RawMessage `json:"scope"`
 		RequestMiddlewares []json.RawMessage `json:"request_middlewares"`
-		ProxyServer  *string           `json:"proxy_server,omitempty"`
+		ProxyServer        *string           `json:"proxy_server,omitempty"`
 	}
 
-	var alias ConfigAlias
+	var alias ConfigElementAlias
 	if err := json.Unmarshal(data, &alias); err != nil {
 		return err
 	}
@@ -58,6 +60,8 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 		}
 		c.ProxyServer = parsedUrl
 	}
+
+	c.Name = alias.Name
 
 	for _, rawScope := range alias.Scope {
 		var peeker struct {
