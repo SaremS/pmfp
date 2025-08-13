@@ -1,7 +1,8 @@
 scope:
 - type: exact_match
-  target_host: 94.237.57.115:54987
+  target_host: 94.237.54.192:57887
 request_manipulators:
 - type: add_header
   header_name: x-middleware-subrequest
   header_value: "middleware:middleware:middleware:middleware:middleware"
+proxy_server: http://127.0.0.1:8081

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"encoding/json"
 
@@ -14,8 +15,9 @@ type ScopeArray []scope.Scope
 type ManipulatorArray []rm.RequestManipulator
 
 type Config struct {
-	Scope       ScopeArray       
-	Manipulators ManipulatorArray 
+	Scope        ScopeArray
+	Manipulators ManipulatorArray
+	ProxyServer  *url.URL
 }
 
 func (c *Config) isInScope(target string) bool {
@@ -28,7 +30,7 @@ func (c *Config) isInScope(target string) bool {
 }
 
 func (c *Config) ApplyManipulation(request *http.Request) {
-	target := request.URL.Host 
+	target := request.URL.Host
 
 	if c.isInScope(target) {
 		for _, manipulator := range c.Manipulators {
@@ -39,13 +41,22 @@ func (c *Config) ApplyManipulation(request *http.Request) {
 
 func (c *Config) UnmarshalJSON(data []byte) error {
 	type ConfigAlias struct {
-		Scope []json.RawMessage `json:"scope"`
+		Scope        []json.RawMessage `json:"scope"`
 		Manipulators []json.RawMessage `json:"request_manipulators"`
+		ProxyServer  *string           `json:"proxy_server,omitempty"`
 	}
 
 	var alias ConfigAlias
 	if err := json.Unmarshal(data, &alias); err != nil {
 		return err
+	}
+
+	if alias.ProxyServer != nil {
+		parsedUrl, err := url.Parse(*alias.ProxyServer)
+		if err != nil {
+			return fmt.Errorf("failed to decode proxy server: %w", err)
+		}
+		c.ProxyServer = parsedUrl
 	}
 
 	for _, rawScope := range alias.Scope {
@@ -91,5 +102,3 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
-
-

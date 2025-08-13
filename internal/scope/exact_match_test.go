@@ -17,7 +17,7 @@ target_host: http://test.test
 	}
 
 	if em.TargetHost != "http://test.test" {
-	t.Errorf("Execpted TargetHost to be 'http://test.test', go %s", em.TargetHost)
+		t.Errorf("Execpted TargetHost to be 'http://test.test', go %s", em.TargetHost)
 	}
 }
 
@@ -34,4 +34,3 @@ func TestExactMatchIsInScope(t *testing.T) {
 		t.Fatalf("Hostname 'http://test.fail' is expected to NOT be in scope")
 	}
 }
-

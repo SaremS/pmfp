@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"flag"
-	"os"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"sigs.k8s.io/yaml"
@@ -33,8 +33,20 @@ func (p *ProxyHandler) HandleHttp(w http.ResponseWriter, r *http.Request) {
 		proxyReq.Header[h] = val
 	}
 
-	client := &http.Client {
-		Timeout: 3 * time.Second,
+	var client *http.Client
+
+	if p.Config.ProxyServer == nil {
+		client = &http.Client{
+			Timeout: 3 * time.Second,
+		}
+	} else {
+		transport := &http.Transport{
+			Proxy: http.ProxyURL(p.Config.ProxyServer),
+		}
+		client = &http.Client{
+			Timeout:   3 * time.Second,
+			Transport: transport,
+		}
 	}
 
 	p.Config.ApplyManipulation(proxyReq)
@@ -58,7 +70,7 @@ func (p *ProxyHandler) HandleHttp(w http.ResponseWriter, r *http.Request) {
 func main() {
 	configPath := flag.String("config", "config.yaml", "Path to forward proxy config")
 	targetPort := flag.Int("port", 8080, "Port number to bind to")
-	
+
 	flag.Parse()
 
 	data, err := os.ReadFile(*configPath)
@@ -66,14 +78,14 @@ func main() {
 		fmt.Printf("Error reading config file: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	var config config.Config
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		fmt.Printf("Error unmarshaling YAML: %v\n", err)
 		os.Exit(1)
-	}	
+	}
 
-	proxyHandler := ProxyHandler{ Config: config}
+	proxyHandler := ProxyHandler{Config: config}
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%d", *targetPort),
