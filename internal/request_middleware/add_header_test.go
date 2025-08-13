@@ -1,4 +1,4 @@
-package request_manipulation
+package request_middleware
 
 import (
 	"net/http"

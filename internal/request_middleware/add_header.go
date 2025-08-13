@@ -1,4 +1,4 @@
-package request_manipulation
+package request_middleware
 
 import (
 	"net/http"
@@ -14,5 +14,5 @@ func (a *AddHeader) Apply(request *http.Request) {
 }
 
 func init() {
-	RegisterRequestManipulator("add_header", func() RequestManipulator { return &AddHeader{} })
+	RegisterRequestMiddleware("add_header", func() RequestMiddleware{ return &AddHeader{} })
 }

@@ -7,16 +7,16 @@ import (
 
 	"encoding/json"
 
-	rm "github.com/sarems/pmfp/internal/request_manipulation"
+	rm "github.com/sarems/pmfp/internal/request_middleware"
 	"github.com/sarems/pmfp/internal/scope"
 )
 
 type ScopeArray []scope.Scope
-type ManipulatorArray []rm.RequestManipulator
+type RequestMiddlewareArray []rm.RequestMiddleware
 
 type Config struct {
 	Scope        ScopeArray
-	Manipulators ManipulatorArray
+	RequestMiddlewares RequestMiddlewareArray 
 	ProxyServer  *url.URL
 }
 
@@ -33,7 +33,7 @@ func (c *Config) ApplyManipulation(request *http.Request) {
 	target := request.URL.Host
 
 	if c.isInScope(target) {
-		for _, manipulator := range c.Manipulators {
+		for _, manipulator := range c.RequestMiddlewares {
 			manipulator.Apply(request)
 		}
 	}
@@ -42,7 +42,7 @@ func (c *Config) ApplyManipulation(request *http.Request) {
 func (c *Config) UnmarshalJSON(data []byte) error {
 	type ConfigAlias struct {
 		Scope        []json.RawMessage `json:"scope"`
-		Manipulators []json.RawMessage `json:"request_manipulators"`
+		RequestMiddlewares []json.RawMessage `json:"request_middlewares"`
 		ProxyServer  *string           `json:"proxy_server,omitempty"`
 	}
 
@@ -80,25 +80,25 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 		c.Scope = append(c.Scope, scope)
 	}
 
-	for _, rawManipulator := range alias.Manipulators {
+	for _, rawMiddleware := range alias.RequestMiddlewares {
 		var peeker struct {
 			Type string `json:"type"`
 		}
-		if err := json.Unmarshal(rawManipulator, &peeker); err != nil {
+		if err := json.Unmarshal(rawMiddleware, &peeker); err != nil {
 			return fmt.Errorf("failed to decode manipulator type: %w", err)
 		}
 
-		factory, found := rm.RequestManipulatorRegistry[peeker.Type]
+		factory, found := rm.RequestMiddlewareRegistry[peeker.Type]
 		if !found {
 			return fmt.Errorf("unknown request manipulator type: '%s'", peeker.Type)
 		}
 
-		requestManipulator := factory()
+		requestMiddleware := factory()
 
-		if err := json.Unmarshal(rawManipulator, requestManipulator); err != nil {
+		if err := json.Unmarshal(rawMiddleware, requestMiddleware); err != nil {
 			return err
 		}
-		c.Manipulators = append(c.Manipulators, requestManipulator)
+		c.RequestMiddlewares = append(c.RequestMiddlewares, requestMiddleware)
 	}
 	return nil
 }

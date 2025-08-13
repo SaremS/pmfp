@@ -1,7 +1,7 @@
 package config
 
 import (
-	rm "github.com/sarems/pmfp/internal/request_manipulation"
+	rm "github.com/sarems/pmfp/internal/request_middleware"
 	"github.com/sarems/pmfp/internal/scope"
 	"sigs.k8s.io/yaml"
 	"testing"
@@ -14,7 +14,7 @@ scope:
   target_host: http://api.example.com
 - type: exact_match
   target_host: http://api2.example.com
-request_manipulators:
+request_middlewares:
 - type: add_header
   header_name: X-Test
   header_value: Test
@@ -52,13 +52,13 @@ request_manipulators:
 
 	//---Manipulators
 	expectedLen = 1
-	if len(cfg.Manipulators) != expectedLen {
-		t.Fatalf("Expected %d request manipulators, but got %d", expectedLen, len(cfg.Manipulators))
+	if len(cfg.RequestMiddlewares) != expectedLen {
+		t.Fatalf("Expected %d request manipulators, but got %d", expectedLen, len(cfg.RequestMiddlewares))
 	}
 
-	exactManipulator, ok := cfg.Manipulators[0].(*rm.AddHeader)
+	exactManipulator, ok := cfg.RequestMiddlewares[0].(*rm.AddHeader)
 	if !ok {
-		t.Fatalf("Expected request manipulator to be of type *rm.AddHeader, but got %T", cfg.Manipulators[0])
+		t.Fatalf("Expected request manipulator to be of type *rm.AddHeader, but got %T", cfg.RequestMiddlewares[0])
 	}
 
 	expectedHeaderName := "X-Test"
@@ -83,7 +83,7 @@ scope:
   target_host: http://api.example.com
 - type: exact_match
   target_host: http://api2.example.com
-request_manipulators:
+request_middlewares:
 - type: add_header
   header_name: X-Test
   header_value: Test
@@ -122,13 +122,13 @@ proxy_server: http://localhost:8000
 
 	//---Manipulators
 	expectedLen = 1
-	if len(cfg.Manipulators) != expectedLen {
-		t.Fatalf("Expected %d request manipulators, but got %d", expectedLen, len(cfg.Manipulators))
+	if len(cfg.RequestMiddlewares) != expectedLen {
+		t.Fatalf("Expected %d request middlewares, but got %d", expectedLen, len(cfg.RequestMiddlewares))
 	}
 
-	exactManipulator, ok := cfg.Manipulators[0].(*rm.AddHeader)
+	exactManipulator, ok := cfg.RequestMiddlewares[0].(*rm.AddHeader)
 	if !ok {
-		t.Fatalf("Expected request manipulator to be of type *rm.AddHeader, but got %T", cfg.Manipulators[0])
+		t.Fatalf("Expected request middleware to be of type *rm.AddHeader, but got %T", cfg.RequestMiddlewares[0])
 	}
 
 	expectedHeaderName := "X-Test"

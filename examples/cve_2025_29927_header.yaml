@@ -1,6 +1,6 @@
 scope:
 - type: exact_match
-  target_host: 94.237.54.192:57887
+  target_host: 94.237.57.115:38747
 request_manipulators:
 - type: add_header
   header_name: x-middleware-subrequest
