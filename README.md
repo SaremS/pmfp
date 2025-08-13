@@ -27,4 +27,4 @@ request_manipulators:
 ```
 
 #### Result:
-![Demo](examples/cve_2025_29927_example.gif)
+![Demo](./examples/cve_2025_29927_example.gif)
